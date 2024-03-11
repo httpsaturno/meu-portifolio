@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script>
+        class Funcionario {
+            nome;
+            idade;
+            cargo;
+
+            constructor(nome, idade, cargo) {
+                this.nome = nome;
+                this.idade = idade;
+                this.cargo = cargo;
+            }
+
+            seApresentar() {
+                const result = `Olá! meu nome é ${this.nome}, tenho ${this.idade} anos e o meu cargo é ${this.cargo}.`;
+                console.log(result);
+                return result;
+            }
+
+            trabalhar() {
+                console.log(`Estou trabalhando!`);
+            }
+        }
+
+        class Desenvolvedor extends Funcionario {
+
+            linguagem;
+
+            constructor(nome, idade, linguagem) {
+                super(nome, idade, "Desenvolvedor");
+                this.linguagem = linguagem;
+            }
+
+            trabalhar() {
+                this.programar()
+            }
+
+            programar() {
+                console.log(`Estou programando em ${this.linguagem}!`);
+            }
+        }
+
+        class Gerente extends Funcionario {
+
+            departamento;
+
+            constructor(nome, idade, departamento) {
+                super(nome, idade, "Gerente");
+                this.departamento = departamento;
+            }
+
+            trabalhar() {
+                this.gerenciar()
+            }
+
+            gerenciar() {
+                console.log(`Estou gerenciando o departamento ${this.departamento}`)
+            }
+        }
+
+        const funcionarios = []
+
+        function criarFuncionario() {
+            adicionaDisplayNone('div[role="alert"]')
+
+            const nome = document.querySelector('input[id="nome"]').value
+            const idade = document.querySelector('input[id="idade"]').value
+            const cargo = document.querySelector('select[id="cargo"]').value
+            const departamento = document.querySelector('input[id="departamento"]').value
+            const linguagem = document.querySelector('input[id="linguagem"]').value
+
+            try {
+                if (!nome || (isNaN(idade) || idade <= 0) || (!cargo || !["GERENTE", "DESENVOLVEDOR"].includes(cargo))) {
+                    throw Error("Fomulário contém erros, preencha os dados corretamente")
+                }
+
+                if (cargo === "GERENTE" && !departamento) {
+                    throw Error("Foi selecionado o cargo de Gerente mas nenhum departamento foi informado.")
+                } else if (cargo === "DESENVOLVEDOR" && !linguagem) {
+                    throw Error("Foi selecionado o cargo de Desenvolvedor mas nenhuma linguagem de programação foi informada.")
+                }
+
+                if (cargo === "GERENTE") {
+                    funcionarios.push(new Gerente(nome, idade, departamento))
+                } else if (cargo === "DESENVOLVEDOR") {
+                    funcionarios.push(new Desenvolvedor(nome, idade, linguagem))
+                }
+
+                mostrarFuncionarios(funcionarios)
+            } catch (e) {
+                console.error(e)
+                exibirErro(e.message)
+            }
+        }
+
+        function exibirErro(mensagem) {
+            const seletor = 'div[role="alert"]'
+            removeDisplayNone(seletor)
+            adicionaInnerText(seletor, mensagem)
+        }
+
+        function complementoFormulario() {
+            const tipoFuncionario = document.querySelector('select[id="cargo"]').value
+            const seletorFormGerente = 'div[id="form-gerente"]'
+            const seletorFormDesenvolvedor = 'div[id="form-desenvolvedor"]'
+            adicionaDisplayNone(seletorFormGerente)
+            adicionaDisplayNone(seletorFormDesenvolvedor)
+            if (tipoFuncionario === "GERENTE") {
+                removeDisplayNone(seletorFormGerente)
+            } else if (tipoFuncionario === "DESENVOLVEDOR") {
+                removeDisplayNone(seletorFormDesenvolvedor)
+            }
+        }
+
+        function adicionaDisplayNone(seletor) {
+            const elemento = document.querySelector(seletor)
+            elemento.classList.add("d-none");
+        }
+
+        function removeDisplayNone(seletor) {
+            const elemento = document.querySelector(seletor)
+            elemento.classList.remove("d-none");
+        }
+
+        function adicionaInnerText(seletor, texto) {
+            const elemento = document.querySelector(seletor)
+            elemento.innerText = texto
+        }
+
+        function mostrarFuncionarios(funcionarios) {
+            const lista = document.querySelector('ul[id="lista-funcionarios"]')
+            if (Array.isArray(funcionarios) && funcionarios.length <= 0) {
+                return
+            } else {
+                const emptyEntryInfo = lista.querySelectorAll('li')
+                if (emptyEntryInfo) {
+                    emptyEntryInfo.forEach(value => value.remove())
+                }
+                funcionarios.forEach((funcionario) => {
+                    var li = document.createElement("li")
+                    li.classList.add("list-group-item")
+                    li.innerHTML = funcionario.seApresentar()
+                    lista.append(li)
+                })
+            }
+        }
+    </script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <div class="d-grid gap-3">
+        <div class="row">
+            <form>
+                <div class="alert alert-danger d-none" role="alert">
+                    Ocorreu um erro!
+                </div>
+                <div class="d-grid gap-4">
+                    <div class="row">
+                        <div class="form-group col-sm-9">
+                            <label for="nome">Nome</label>
+                            <input type="text" class="form-control" id="nome" placeholder="Seu nome">
+                        </div>
+                        <div class="form-group col">
+                            <label for="idade">Idade</label>
+                            <input type="number" class="form-control" id="idade" placeholder="Sua idade">
+                        </div>
+                    </div>
+                    <select class="form-select" id="cargo" aria-label="Cargo" onchange="complementoFormulario()">
+                        <option selected>Defina qual seu cargo</option>
+                        <option value="GERENTE">Gerente</option>
+                        <option value="DESENVOLVEDOR">Desenvolvedor</option>
+                    </select>
+                    <div class="form-group d-none" id="form-gerente">
+                        <label for="departamento">Departamento</label>
+                        <input type="text" class="form-control" id="departamento" placeholder="Depertamento gerenciado">
+                    </div>
+                    <div class="form-group d-none" id="form-desenvolvedor">
+                        <label for="linguagem">Linguagem de programação</label>
+                        <input type="text" class="form-control" id="linguagem" placeholder="Linguagem de programação">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="criarFuncionario()">Enviar</button>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <ul class="list-group" id="lista-funcionarios">
+                <li class="list-group-item" id="lista-funcionarios-empty">Nenhum funcionario encontrado.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
